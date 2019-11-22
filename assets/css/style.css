@@ -1,0 +1,36 @@
+
+.jumbotron {
+    background-color: black; 
+    color: white;
+    height: 100px;
+    
+}
+
+.chat-card {
+    display: none;
+}
+#message-text {
+
+    margin-top: 15px;
+    width: 960px;
+    display: inline;
+}
+
+#chat-text {
+    width: 100%;
+    max-height: 450px;
+    overflow-y: scroll;
+
+}
+
+#send-button {
+    position: relative;
+    top: -2px;
+    width: 100px;
+}
+
+#nickname-text {
+width: 400px;
+display: inline;
+
+}

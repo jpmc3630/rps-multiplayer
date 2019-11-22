@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="en-us">
+
+<head>
+
+  <meta charset="UTF-8">
+  <title>Rock Paper Scissors Online!</title>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="./assets/css/style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-analytics.js"></script>
+
+  <!-- Moment.js Reference -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+
+
+</head>
+
+<body>
+
+  <!-- Employee Tracker -->
+  <div class="container">
+
+    <!-- Jumbotron -->
+    <div class="jumbotron">
+      <h1 class="text-center" style="position:relative; top: -25px;">Chatzone '99</h1>
+      
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+
+        <!-- Nickname -->
+        <div class="card mb-4 nickname-card">
+            <div class="card-header text-center">Choose a nickname</div>
+            <div class="card-body text-center">
+            <form>
+                <input type="text" id="nickname-text" class="form-control form-control-sm" placeholder="nickname">
+                <button class="btn btn-sm btn-dark" id="join-chat-button">Enter Lobby</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="row">
+            <div class="col-md-12">
+              <!-- Chat -->
+              <div class="card mb-4 chat-card">
+                <div class="card-header text-center">Lobby</div>
+                <div class="card-body">
+      
+                    <div id="chat-text"><br>hello<br></div>
+                    <form>
+                        <input class="form-control form-control-sm" id="message-text" placeholder="Message" type="text">
+                        <button class="btn btn-sm btn-dark" id="message-button">Send</button>
+                    </form>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+
+
+  </div>
+
+  <!-- JavaScript -->
+  <script src="./assets/javascript/game.js"></script>
+
+</body>
+
+</html>
