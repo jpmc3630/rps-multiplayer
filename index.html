@@ -44,7 +44,7 @@
             <div class="card-header text-center">Choose a nickname</div>
             <div class="card-body text-center">
             <form>
-                <input type="text" id="nickname-text" class="form-control form-control-sm" placeholder="nickname">
+                <input type="text" id="nickname-text" class="form-control form-control-sm" placeholder="Nickname">
                 <button class="btn btn-sm btn-dark" id="join-chat-button">Enter Lobby</button>
             </form>
           </div>
@@ -61,7 +61,12 @@
                 <div class="card-header text-center">Lobby</div>
                 <div class="card-body">
       
-                    <div id="chat-text"><br>hello<br></div>
+                    <div id="chat-text"></div>
+                    
+                    <select id="users-list" size="21" style="border-style: none;">
+                      
+                    </select>
+                    
                     <form>
                         <input class="form-control form-control-sm" id="message-text" placeholder="Message" type="text">
                         <button class="btn btn-sm btn-dark" id="message-button">Send</button>

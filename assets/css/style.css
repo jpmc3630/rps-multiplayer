@@ -9,24 +9,32 @@
 .chat-card {
     display: none;
 }
-#message-text {
 
-    margin-top: 15px;
-    width: 960px;
-    display: inline;
-}
 
 #chat-text {
-    width: 100%;
+    width: 84%;
+    
     max-height: 450px;
     overflow-y: scroll;
+    float: left;
 
+}
+
+#users-list {
+    width: 15%;
+    overflow-y: scroll;
+
+}
+
+#message-text {
+    margin-top: 15px;
+    width: 75%;
+    display: inline;
 }
 
 #send-button {
     position: relative;
     top: -2px;
-    width: 100px;
 }
 
 #nickname-text {
