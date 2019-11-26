@@ -11,6 +11,16 @@
 }
 
 
+.game-card {
+    display: none;
+}
+
+.rps-card {
+    display: none;
+}
+
+
+
 #chat-text {
     width: 84%;
     
@@ -23,7 +33,7 @@
 #users-list {
     width: 15%;
     overflow-y: scroll;
-
+    border-style: none;
 }
 
 #message-text {
@@ -35,10 +45,17 @@
 #send-button {
     position: relative;
     top: -2px;
+    display: inline;
 }
 
 #nickname-text {
 width: 400px;
 display: inline;
+}
 
+#rps-button {
+    
+    display: inline;
+    float: right;
+    position: relative;
 }

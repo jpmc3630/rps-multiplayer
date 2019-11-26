@@ -15,6 +15,7 @@
   var database = firebase.database();
   
   let myKey;
+  let gameKey;
 
   let nickname;
   let nickcolor;
@@ -70,9 +71,18 @@ $('#join-chat-button').on("click", function() {
 
 });
   
+// on close
 window.addEventListener('beforeunload', function (e) {
+    // remove myself as user
     database.ref('users/' + myKey).remove();
-
+    // send departing message to chat room
+    database.ref('chat').push({
+        time: moment().format('HH:mm:ss'),
+        color: nickcolor,
+        nickname: nickname,
+        message: ` has left the lobby.`,
+        type: `message`
+        });
 });
 
 
@@ -120,7 +130,6 @@ database.ref('chat').on("child_added", function(childSnapshot) {
     
     // if the new message is mine, remove it
     if (childSnapshot.val().nickname == nickname) {
-        console.log('it is our message')
         database.ref('chat').child(childSnapshot.ref.key).remove();
     }
 });
@@ -147,3 +156,79 @@ $('#message-button').on("click", function(event) {
     $('#message-text').val('');
     $('#message-text').select();
 });
+
+$('#game-button').on("click", function(event) {
+
+    $('.game-card').css('display', 'block');
+
+});
+
+$('#rps-button').on("click", function(event) {
+
+    let opponentKey = $('#users-list option:selected').attr('id');
+    let opponentNickname = $('#users-list option:selected').val();
+    let opponentColor = $('#users-list option:selected').attr('color');
+
+    if (opponentKey == undefined) {
+        alert('choose a user to play first!')
+    } else {
+
+        initiateGame(opponentKey, opponentNickname, opponentColor);
+    }
+});
+
+function initiateGame(opponentKey, opponentNickname, opponentColor) {
+    $('.game-card').css('display', 'none');
+    $('.rps-card').css('display', 'block');
+    $('.rps-card').append(`Waiting for <font color="${opponentColor}">${opponentNickname}</font> to accept game!`)
+    
+    database.ref('games').push({
+        time: moment().format('HH:mm:ss'),
+        hostColor: nickcolor,
+        hostNickname: nickname,
+        hostKey: myKey,
+        game: `rps`,
+        status: `invite`,
+        target: opponentKey
+        });
+
+}
+
+database.ref('games').on("child_added", function(childSnapshot) {
+    
+    // if type is a message, display it in the chat window
+    if (childSnapshot.val().target == myKey && childSnapshot.val().status == `invite`) {
+
+        $('.rps-card').css('display', 'block');
+        $('.rps-card').append(
+            `<font color="${childSnapshot.val().hostColor}">${childSnapshot.val().hostNickname}</font> has challenged you to a game of Rock Paper Scissors!<br>
+            <button onClick="acceptGame(childSnapshot)">Accept</button><button onClick="declineGame(childSnapshot)>Decline</button>
+            `);
+    }
+
+    
+
+});
+
+
+function acceptGame(childSnapshot) {
+    gameKey = childSnapshot.ref.key;
+    
+    database.ref('games/' + gameKey).update({
+        time: moment().format('HH:mm:ss'),
+        status: `connected`
+     })  
+}
+
+function declineGame(childSnapshot) {
+
+    $('.rps-card').html(``);
+    $('.rps-card').css('display', 'none');
+    database.ref('games/' + gameKey).update({
+        time: moment().format('HH:mm:ss'),
+        status: `declined`
+     })  
+
+
+}
+
