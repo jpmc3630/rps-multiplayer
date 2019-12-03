@@ -35,11 +35,24 @@ $('document').ready(function() {
 $('#join-chat-button').on("click", function() {
     event.preventDefault();
 
+    nickname = $('#nickname-text').val().trim();
 
-    $('.nickname-card').css('display', 'none')
+    let nickIsUnique = true;
+    database.ref('users').once("value", function(users) {
+        // when a user is removed from database, remove them from the list
+        
+            for (key in users.val()) {
+                if (nickname == users.val()[key].nickname) {
+                    nickIsUnique = false;
+                };
+            }
+
+    if (nickIsUnique) {
+
+        $('.nickname-card').css('display', 'none')
     $('.chat-card').css('display', 'block')
 
-    nickname = $('#nickname-text').val().trim();
+    
     nickcolor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
     
     if (nickname == "") {
@@ -56,24 +69,20 @@ $('#join-chat-button').on("click", function() {
                 last : moment().format('HH:mm:ss')
             });
 
-
         database.ref('chat').push({
             time: moment().format('HH:mm:ss'),
             color: nickcolor,
             nickname: nickname,
             message: ` has joined the lobby.`,
             type: `message`
-            });
-       
-        
-        // sets up the pinger to update FB with current time
-        // pinger = setInterval(function() {
-        //     console.log('timer runs');
-        //         database.ref('users/' + myKey).update({
-        //            last: moment().format('HH:mm:ss')
-        //         })           
-        //     }, 60000);
+            });      
 
+    } else {
+
+        $('#message-text').select();
+        $('.login-display').append(`<br>Sorry nickname '${nickname}' is taken already!`);
+    }
+    });
 
 });
   
@@ -169,7 +178,6 @@ $('#game-button').on("click", function(event) {
 
 $('#rps-quit-button').on("click", function(event) {
 
-
     database.ref('games/' + gameKey).remove();
     $('#game-button').css('display', 'block');
 });
@@ -183,6 +191,10 @@ $('#rps-button').on("click", function(event) {
     if (opponentKey == undefined) {
         $('.game-display').html(``);
         $('.game-display').append(`<br>Please choose an opponent first!`);
+        
+    } else if (opponentKey == myKey) {
+        $('.game-display').html(``);
+        $('.game-display').append(`<br>You can't play with yourself!`);
         
     } else {
         initiateGame(opponentKey, opponentNickname, opponentColor);
@@ -209,7 +221,6 @@ function initiateGame(opponentKey, opponentNickname, opponentColor) {
         targetMove: `none`
 
         });
-
 }
 
 database.ref('games').on("child_added", function(childSnapshot) {
@@ -241,24 +252,19 @@ function acceptGame() {
         status: `connected`
      })  
 
-
         database.ref('chat').push({
             time: moment().format('HH:mm:ss'),
             color: nickcolor,
             nickname: nickname,
             message: `and <font color="${playerInfo.hostColor}">${playerInfo.hostNickname}</font> are playing Rock Paper Scissors!`,
             type: `message`
-            });
-
-
-            
+            });          
 }
 
 function declineGame() {
      database.ref('games/' + gameKey).remove();
      
 }
-
 
 database.ref('games').on("child_removed", function(childSnapshot) {
 
@@ -267,7 +273,7 @@ database.ref('games').on("child_removed", function(childSnapshot) {
         $('.rps-card').css('display', 'none');
         $('#game-button').css('display', 'block');
         
-        if (imHosting) {
+        if (imHosting && targetScore > 0 && hostScore > 0) {
             database.ref('chat').push({
                 time: moment().format('HH:mm:ss'),
                 color: nickcolor,
@@ -281,9 +287,7 @@ database.ref('games').on("child_removed", function(childSnapshot) {
         hostMove = `none`;
         hostScore = 0;
         targetScore = 0;
-
     }
-    
 });
 
 function RPS() {
@@ -411,17 +415,13 @@ function RPS() {
                         time: moment().format('HH:mm:ss'),
                         status: `gameover`
                      })  
-
-
         }
-        console.log(snapshot.val());
     });
 }
 
 function newGame() {
     targetMove = `none`;
     hostMove = `none`;
-    console.log('new game');
 
      database.ref('games/' + gameKey).update({
         time: moment().format('HH:mm:ss'),
@@ -448,3 +448,11 @@ function myPick(move) {
          })  
     }
 }
+
+        // Pinger idea, to remove any dead users who get 'stuck' in the room
+        // sets up the pinger to update FB with current time
+        // pinger = setInterval(function() {
+        //         database.ref('users/' + myKey).update({
+        //            last: moment().format('HH:mm:ss')
+        //         })           
+        //     }, 60000);
