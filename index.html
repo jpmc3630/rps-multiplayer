@@ -32,10 +32,10 @@
 
     <!-- Jumbotron -->
     <div class="jumbotron">
-      <h1 class="text-center" style="position:relative; top: -25px;">Chatzone '99</h1>
+      <h1 class="text-center" style="position:relative; top: -25px;">Gamezone '99</h1>
       
     </div>
-    <div><h1 style="color:red">Still not ready for marking sorry! Will be done by Saturday</h1></div>
+    
     <div class="row">
       <div class="col-md-12">
 
@@ -60,8 +60,9 @@
           <!-- game card -->
           <div class="card mb-4 game-card">
               <div class="card-header text-center">Let's Play!</div>
-              <div class="card-body text-center"> Choose an opponent first and then choose a game
+              <div class="card-body text-center"> Choose an opponent first and then choose a game<BR><BR>
                 <button class="btn btn-sm btn-dark" id="rps-button">Rock Paper Scissors!</button>
+                <div class="game-display text-center"></div>
               </div>
           </div>
         </div>
@@ -71,7 +72,7 @@
         <div class="col-md-12">
               <!-- RPS -->
             <div class="card mb-4 rps-card">
-                <div class="card-header text-center">Rock Paper Scissors!</div>
+                <div class="card-header text-center">Rock Paper Scissors!<button class="btn btn-sm btn-dark" id="rps-quit-button">Quit</button></div>
                 <div class="card-body text-center" id="rps-content"></div>
             </div>
           
@@ -84,7 +85,7 @@
             <div class="col-md-12">
               <!-- Chat -->
               <div class="card mb-4 chat-card">
-                <div class="card-header text-center">Lobby</div>
+                <div class="card-header text-center">Lobby<button class="btn btn-sm btn-dark" id="game-button">Play a game!</button></div>
                 <div class="card-body">
       
                     <div id="chat-text"></div>
@@ -98,7 +99,7 @@
                         <button class="btn btn-sm btn-dark" id="message-button">Send</button>
                         
                     </form>
-                    <button class="btn btn-sm btn-dark" id="game-button">Play a game!</button>
+                    
                     
                     
                   

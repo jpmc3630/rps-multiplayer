@@ -22,8 +22,10 @@
   let nickname;
   let nickcolor;
   
-//   let pinger;
-  let terminator;
+  let targetMove = `none`;
+  let hostMove = `none`;
+  let hostScore = 0;
+  let targetScore = 0;
 
 
 $('document').ready(function() {
@@ -41,7 +43,7 @@ $('#join-chat-button').on("click", function() {
     nickcolor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
     
     if (nickname == "") {
-        nickname = "Anonymous";
+        nickname = "Anonymous" + (Math.floor(Math.random() * 1000) + 1);
     }
 
         $('#message-text').select();
@@ -98,7 +100,7 @@ database.ref('users').on("child_added", function(childSnapshot) {
     userToAppend.attr('id', childSnapshot.ref.key);
     userToAppend.attr('value', childSnapshot.val().nickname);
     userToAppend.css('color', childSnapshot.val().nickcolor);
-    
+    userToAppend.attr('data-color', childSnapshot.val().nickcolor);
     if (childSnapshot.val().nickname == nickname) {
         // grab myKey when it comes past and add bold to MY name
         myKey = childSnapshot.ref.key;
@@ -114,8 +116,6 @@ database.ref('users').on("child_removed", function(childSnapshot) {
     // when a user is removed from database, remove them from the list
     $(`#${childSnapshot.ref.key}`).remove();
 });
-
-
 
 
 // listen for new messages
@@ -164,28 +164,36 @@ $('#message-button').on("click", function(event) {
 $('#game-button').on("click", function(event) {
 
     $('.game-card').css('display', 'block');
+    $('#game-button').css('display', 'none');
+});
 
+$('#rps-quit-button').on("click", function(event) {
+
+
+    database.ref('games/' + gameKey).remove();
+    $('#game-button').css('display', 'block');
 });
 
 $('#rps-button').on("click", function(event) {
 
     let opponentKey = $('#users-list option:selected').attr('id');
     let opponentNickname = $('#users-list option:selected').val();
-    let opponentColor = $('#users-list option:selected').attr('color');
+    let opponentColor = $('#users-list option:selected').attr('data-color');
 
     if (opponentKey == undefined) {
-        alert('choose a user to play first!')
+        $('.game-display').html(``);
+        $('.game-display').append(`<br>Please choose an opponent first!`);
+        
     } else {
-
         initiateGame(opponentKey, opponentNickname, opponentColor);
     }
 });
 
 function initiateGame(opponentKey, opponentNickname, opponentColor) {
+
     $('.game-card').css('display', 'none');
     $('.rps-card').css('display', 'block');
     $('#rps-content').append(`Waiting for <font color="${opponentColor}">${opponentNickname}</font> to accept game!`)
-    
 
     database.ref('games').push({
         time: moment().format('HH:mm:ss'),
@@ -196,7 +204,7 @@ function initiateGame(opponentKey, opponentNickname, opponentColor) {
         status: `invite`,
         target: opponentKey,
         targetNickname: opponentNickname,
-        targetColor: `red`,  //bit suss
+        targetColor: opponentColor,
         hostMove: `none`,
         targetMove: `none`
 
@@ -206,85 +214,104 @@ function initiateGame(opponentKey, opponentNickname, opponentColor) {
 
 database.ref('games').on("child_added", function(childSnapshot) {
     playerInfo = childSnapshot.val();
-    // if type is a message, display it in the chat window
+
     if (childSnapshot.val().target == myKey && childSnapshot.val().status == `invite`) {
+        $('#game-button').css('display', 'none');
         imHosting = false;
         gameKey = childSnapshot.ref.key;
         $('.rps-card').css('display', 'block');
         $('#rps-content').append(
-            `<font color="${childSnapshot.val().hostColor}">${childSnapshot.val().hostNickname}</font> has challenged you to a game of Rock Paper Scissors!<br>
-            <button onClick="acceptGame()">Accept</button><button onClick="declineGame()">Decline</button>
+            `<font color="${childSnapshot.val().hostColor}">${childSnapshot.val().hostNickname}</font> has challenged you to a game of Rock Paper Scissors!<br><br>
+            <button class="btn btn-sm btn-dark" onClick="acceptGame()">Accept</button>
+            <button class="btn btn-sm btn-dark" onClick="declineGame()">Decline</button>
             `);
+        RPS();
     } else if (childSnapshot.val().hostKey == myKey) {
         gameKey = childSnapshot.ref.key;
         imHosting = true;
+        RPS();
     }
-
-RPS();
-
 
 });
 
 
 function acceptGame() {
-
     database.ref('games/' + gameKey).update({
         time: moment().format('HH:mm:ss'),
         status: `connected`
      })  
+
+
+        database.ref('chat').push({
+            time: moment().format('HH:mm:ss'),
+            color: nickcolor,
+            nickname: nickname,
+            message: `and <font color="${playerInfo.hostColor}">${playerInfo.hostNickname}</font> are playing Rock Paper Scissors!`,
+            type: `message`
+            });
+
+
+            
 }
 
 function declineGame() {
      database.ref('games/' + gameKey).remove();
+     
 }
 
 
 database.ref('games').on("child_removed", function(childSnapshot) {
-    
-   console.log(childSnapshot.ref.key);
-   console.log(gameKey);
 
     if (childSnapshot.ref.key == gameKey) {
         $('#rps-content').html(``);
         $('.rps-card').css('display', 'none');
+        $('#game-button').css('display', 'block');
+        
+        if (imHosting) {
+            database.ref('chat').push({
+                time: moment().format('HH:mm:ss'),
+                color: nickcolor,
+                nickname: nickname,
+                message: `and <font color="${playerInfo.targetColor}">${playerInfo.targetNickname}</font> have finished playing RPS. Final score: <font color="${nickcolor}">${nickname}</font>: ${hostScore} - <font color="${playerInfo.targetColor}">${playerInfo.targetNickname}</font>: ${targetScore}`,
+                type: `message`
+                });
+        }
+
+        targetMove = `none`;
+        hostMove = `none`;
+        hostScore = 0;
+        targetScore = 0;
+
     }
     
 });
 
-let targetMove = `none`;
-let hostMove = `none`;
-let hostScore = 0;
-let targetScore = 0;
-
 function RPS() {
+
     database.ref('games/' + gameKey).on("child_changed", function(snapshot) {
         if (snapshot.val() == "connected") {
             $('#rps-content').html(``);
-            $('#rps-content').html(`
-            <button onClick="myPick('rock')">Rock</button>
-            <button onClick="myPick('paper')">Paper</button>
-            <button onClick="myPick('scissors')">Scissors</button>
+            $('#rps-content').html(`Make your selection!<br><br>
+            <button class="btn btn-sm btn-dark" onClick="myPick('rock')">Rock</button>
+            <button class="btn btn-sm btn-dark" onClick="myPick('paper')">Paper</button>
+            <button class="btn btn-sm btn-dark" onClick="myPick('scissors')">Scissors</button>
             `);
             
-        }
-        console.log(snapshot.val());
-
-
+        } 
 
         if (snapshot.ref.key == `targetMove`) {
             targetMove = snapshot.val();
-            console.log('Set target');
         }
     
         if (snapshot.ref.key == `hostMove`) {
             hostMove = snapshot.val();
-            console.log('Set host');
         }
 
         if (hostMove != `none` && targetMove != `none`) {
 
                 let winner;
                 let outcomeDisplay;
+                let msgResult;
                 if (hostMove == "rock") {
                             if (targetMove == "rock") {
                               winner = 'draw';
@@ -295,7 +322,6 @@ function RPS() {
                             }
                   }
     
-    
                     if (hostMove == "paper") {
                             if (targetMove == "rock") {
                               winner = 'host';
@@ -305,7 +331,7 @@ function RPS() {
                               winner = 'target';
                             }
                     }
-    
+
                       if (hostMove == "scissors") {
                             if (targetMove == "rock") {
                               winner = 'target';
@@ -318,50 +344,106 @@ function RPS() {
 
                       if (winner == 'draw') {
                         outcomeDisplay = 'It is a draw';
+
+                        if (imHosting) {
+
+                            database.ref('chat').push({
+                                time: moment().format('HH:mm:ss'),
+                                color: nickcolor,
+                                nickname: nickname,
+                                message: `(${hostScore}) drew a game with <font color="${playerInfo.targetColor}">${playerInfo.targetNickname}</font> (${targetScore})`,
+                                type: `message`
+                                });
+
+                        }
+
                       } else if (winner == 'host') {
-                        outcomeDisplay = playerInfo.hostNickname + ' wins';
                         hostScore++;
+                            if (imHosting) {
+                                outcomeDisplay = 'You win!';
+
+                                database.ref('chat').push({
+                                    time: moment().format('HH:mm:ss'),
+                                    color: nickcolor,
+                                    nickname: nickname,
+                                    message: `(${hostScore}) beat <font color="${playerInfo.targetColor}">${playerInfo.targetNickname}</font> (${targetScore})`,
+                                    type: `message`
+                                    });
+
+                            } else {
+                                outcomeDisplay = 'You Lose!';
+                            }                                          
+
                       } else if (winner == 'target') {
-                        outcomeDisplay = playerInfo.targetNickname + ' wins';
                         targetScore++;
+                            if (imHosting) {
+                                outcomeDisplay = 'You Lose!';
+                            } else {
+                                outcomeDisplay = 'You win!';
+
+                                database.ref('chat').push({
+                                    time: moment().format('HH:mm:ss'),
+                                    color: nickcolor,
+                                    nickname: nickname,
+                                    message: `(${targetScore}) beat <font color="${playerInfo.hostColor}">${playerInfo.hostNickname} </font>(${hostScore})`,
+                                    type: `message`
+                                    });
+
+                            }                             
                       }
 
-            
                       $('#rps-content').html(``);
 
                       $('#rps-content').html(`
-                          ${playerInfo.hostNickname} chose: ${hostMove}<br>
-                          ${playerInfo.targetNickname} chose: ${targetMove}<br><br>
+                            <font color="${playerInfo.hostColor}">${playerInfo.hostNickname}</font>: ${hostMove}<br>
+                            <font color="${playerInfo.targetColor}">${playerInfo.targetNickname}</font>: ${targetMove}<br><br>
                             ${outcomeDisplay}<br><br>
-                            Scoreboard:<br>
-                            ${playerInfo.hostNickname}: ${hostScore}
-                            ${playerInfo.targetNickname}: ${targetScore}
+                            <font color="${playerInfo.hostColor}">${playerInfo.hostNickname}</font>: ${hostScore}<br>
+                            <font color="${playerInfo.targetColor}">${playerInfo.targetNickname}</font>: ${targetScore}<br><br>
+                            <button class="btn btn-sm btn-dark" onClick="newGame()">New Game</button>
+                            
                       `);
 
+                      targetMove = `none`;
+                      hostMove = `none`;
 
-
-
-
+                      database.ref('games/' + gameKey).update({
+                        time: moment().format('HH:mm:ss'),
+                        status: `gameover`
+                     })  
 
 
         }
         console.log(snapshot.val());
     });
+}
 
+function newGame() {
+    targetMove = `none`;
+    hostMove = `none`;
+    console.log('new game');
 
+     database.ref('games/' + gameKey).update({
+        time: moment().format('HH:mm:ss'),
+        status: `connected`,
+        hostMove: `none`,
+        targetMove: `none`
+     })  
+     RPS();
 }
 
 function myPick(move) {
+
+    $('#rps-content').append(`<br><br>Waiting for opponent...`);
+
     if (imHosting) {
         database.ref('games/' + gameKey).update({
-            
             hostMove: move
          })  
     }
 
     if (!imHosting) {
         database.ref('games/' + gameKey).update({
-            
             targetMove: move
          })  
     }

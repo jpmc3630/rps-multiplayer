@@ -19,7 +19,17 @@
     display: none;
 }
 
+#game-button {
+    float: right;
+    position: relative;
+    top: -3px;
+}
 
+#rps-quit-button {
+    float: right;
+    position: relative;
+    top: -3px;
+}
 
 #chat-text {
     width: 84%;
@@ -54,8 +64,6 @@ display: inline;
 }
 
 #rps-button {
-    
     display: inline;
-    float: right;
     position: relative;
 }
