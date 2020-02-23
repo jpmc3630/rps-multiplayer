@@ -1,7 +1,9 @@
-# rps-multiplayer
+# About
+This is a chat lobby for online browser based minigames.<BR>
+So far, the only game available is Rock, Paper, Scissors.<BR>
 
-This is a chat lobby for online browser based minigames.
-So far, the only game available is Rock, Paper, Scissors.
+## Tech
+Built with Javascript/jQuery, Bootstrap & uses Google Firebase Real-time database.
 
 ## Known issues
 Not mobile responsive
